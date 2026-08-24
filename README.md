@@ -17,7 +17,7 @@ Calculadora web responsiva con una interfaz inspirada en una calculadora física
 
 ## Aplicación para Windows
 
-El programa portable se genera como `release/Numa-Calculadora-Windows-1.0.0.exe`. No necesita instalación: basta con abrir el archivo en Windows de 64 bits.
+El programa portable se genera como `release/Numa-Calculadora-Windows-1.0.1.exe`. También se genera un archivo `.zip` de respaldo. En Windows de 64 bits, abre el `.exe`; si el lanzador portable falla, extrae el `.zip` y ejecuta `Numa Calculadora.exe`.
 
 Para reconstruir el ejecutable:
 

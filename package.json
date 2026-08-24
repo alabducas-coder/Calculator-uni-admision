@@ -1,6 +1,6 @@
 {
   "name": "numa-calculadora",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Calculadora electrónica clásica con historial, fracciones y memoria.",
   "main": "electron-main.cjs",
   "author": "Numa",

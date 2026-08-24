@@ -14,6 +14,8 @@ const appDirectory = path.join(workDirectory, 'app');
 const archivePath = path.join(workDirectory, 'app.7z');
 const outputName = `Numa-Calculadora-Windows-${packageData.version}.exe`;
 const outputPath = path.join(releaseDirectory, outputName);
+const zipName = `Numa-Calculadora-Windows-${packageData.version}.zip`;
+const zipPath = path.join(releaseDirectory, zipName);
 const sourceRuntime = path.join(root, 'node_modules', '@firesoon', 'electron-prebuilt', 'dist');
 const sfxSource = path.join(root, 'build-tools', '7zsd_All_x64.sfx');
 const iconPath = path.join(root, 'assets', 'icon.ico');
@@ -93,15 +95,15 @@ function copyApplicationFiles(destination) {
   );
 }
 
-function runSevenZip() {
+function runSevenZip(argumentsList, formatName) {
   fs.chmodSync(sevenZip, 0o755);
   const result = spawnSync(
     sevenZip,
-    ['a', '-t7z', archivePath, '.', '-mx=9', '-m0=lzma2', '-mmt=on'],
+    argumentsList,
     { cwd: appDirectory, encoding: 'utf8', stdio: 'pipe' }
   );
   if (result.status !== 0) {
-    throw new Error(`7-Zip terminó con código ${result.status}: ${result.stderr || result.stdout}`);
+    throw new Error(`${formatName} terminó con código ${result.status}: ${result.stderr || result.stdout}`);
   }
 }
 
@@ -119,16 +121,21 @@ function build() {
   copyApplicationFiles(path.join(appDirectory, 'resources', 'app'));
 
   log('Comprimiendo el programa portable...');
-  runSevenZip();
+  runSevenZip(['a', '-t7z', archivePath, '.', '-mx=9', '-m0=lzma2', '-mmt=on'], '7-Zip');
+  fs.rmSync(zipPath, { force: true });
+  runSevenZip(['a', '-tzip', zipPath, '.', '-mx=9', '-mmt=on'], 'ZIP');
 
   const customizedSfx = path.join(workDirectory, 'numa-sfx.exe');
   patchWindowsResources(sfxSource, customizedSfx);
   const sfxConfiguration = Buffer.from(
-    ';!@Install@!UTF-8!\n' +
-    'Title="Numa Calculadora"\n' +
-    'RunProgram="Numa Calculadora.exe"\n' +
-    'GUIMode="2"\n' +
-    ';!@InstallEnd@!\n',
+    ';!@Install@!UTF-8! \r\n' +
+    'Title="Numa Calculadora" \r\n' +
+    'InstallPath="extract" \r\n' +
+    'GUIMode="1" \r\n' +
+    'OverwriteMode="2" \r\n' +
+    'ExtractTitle="Iniciando Numa Calculadora" \r\n' +
+    'RunProgram="Numa Calculadora.exe" \r\n' +
+    ';!@InstallEnd@! \r\n',
     'utf8'
   );
 
@@ -139,11 +146,15 @@ function build() {
   ]));
 
   const checksum = crypto.createHash('sha256').update(fs.readFileSync(outputPath)).digest('hex');
+  const zipChecksum = crypto.createHash('sha256').update(fs.readFileSync(zipPath)).digest('hex');
   fs.writeFileSync(`${outputPath}.sha256.txt`, `${checksum}  ${outputName}\n`);
+  fs.writeFileSync(`${zipPath}.sha256.txt`, `${zipChecksum}  ${zipName}\n`);
   fs.rmSync(workDirectory, { recursive: true, force: true });
 
   const megabytes = (fs.statSync(outputPath).size / 1024 / 1024).toFixed(1);
+  const zipMegabytes = (fs.statSync(zipPath).size / 1024 / 1024).toFixed(1);
   log(`Listo: release/${outputName} (${megabytes} MB)`);
+  log(`Respaldo: release/${zipName} (${zipMegabytes} MB)`);
 }
 
 build();
