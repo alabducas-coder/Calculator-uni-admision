@@ -4,8 +4,10 @@ Calculadora web responsiva con una interfaz inspirada en una calculadora física
 
 ## Funcionalidades
 
+- Diseño inspirado en las calculadoras electrónicas clásicas.
 - Operaciones de suma, resta, multiplicación y división.
-- Porcentajes, cambio de signo y decimales.
+- Memoria independiente (`MRC`, `M+`, `M−`), raíz cuadrada, porcentajes y cambio de signo.
+- Controles `AC`, borrado de entrada y apagado simulados.
 - Historial accesible en cualquier momento desde los dos botones de historial.
 - Resultados guardados localmente en el navegador (`localStorage`).
 - Recuperación de cualquier resultado anterior con un clic.

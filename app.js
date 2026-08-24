@@ -7,8 +7,9 @@
 
   const resultEl = document.querySelector('#result');
   const expressionEl = document.querySelector('#expression');
-  const keypad = document.querySelector('#keypad');
+  const calculatorEl = document.querySelector('#calculator');
   const memoryIndicator = document.querySelector('#memoryIndicator');
+  const minusIndicator = document.querySelector('#minusIndicator');
   const historyDrawer = document.querySelector('#historyDrawer');
   const drawerBackdrop = document.querySelector('#drawerBackdrop');
   const historyList = document.querySelector('#historyList');
@@ -24,6 +25,9 @@
   let justCalculated = false;
   let lastExpression = '';
   let history = loadHistory();
+  let memoryValue = 0;
+  let isPoweredOn = true;
+  let lastMemoryRecallAt = 0;
   let lastFocusedElement = null;
   let toastTimer;
 
@@ -81,7 +85,6 @@
     waitingForOperand = false;
     justCalculated = false;
     lastExpression = '';
-    memoryIndicator.textContent = 'LISTO';
     updateDisplay();
     updateActiveOperator();
   }
@@ -102,6 +105,73 @@
     displayValue = normalizeResult(percentage);
     justCalculated = false;
     updateDisplay();
+  }
+
+  function clearEntry() {
+    displayValue = '0';
+    waitingForOperand = false;
+    justCalculated = false;
+    lastExpression = pendingOperator && firstOperand !== null
+      ? `${formatDisplay(firstOperand)} ${operatorSymbols[pendingOperator]}`
+      : '';
+    updateDisplay();
+  }
+
+  function calculateSquareRoot() {
+    if (displayValue === 'Error') return;
+    const value = Number(displayValue);
+    if (value < 0) {
+      showError('No existe raíz real de un número negativo');
+      return;
+    }
+    const rootExpression = `√(${formatDisplay(value)})`;
+    displayValue = normalizeResult(Math.sqrt(value));
+    lastExpression = `${rootExpression} =`;
+    addHistory(rootExpression, displayValue);
+    waitingForOperand = false;
+    justCalculated = pendingOperator === null;
+    if (pendingOperator === null) firstOperand = null;
+    updateDisplay();
+  }
+
+  function updateMemory(operation) {
+    if (displayValue === 'Error') return;
+    const value = Number(displayValue);
+    memoryValue = operation === 'add' ? memoryValue + value : memoryValue - value;
+    memoryValue = Number.parseFloat(memoryValue.toPrecision(12));
+    lastMemoryRecallAt = 0;
+    updateDisplay();
+    showToast(operation === 'add' ? 'Valor sumado a memoria' : 'Valor restado de memoria');
+  }
+
+  function recallMemory() {
+    const now = Date.now();
+    if (now - lastMemoryRecallAt < 800) {
+      memoryValue = 0;
+      lastMemoryRecallAt = 0;
+      updateDisplay();
+      showToast('Memoria borrada');
+      return;
+    }
+    displayValue = normalizeResult(memoryValue);
+    waitingForOperand = false;
+    justCalculated = false;
+    lastMemoryRecallAt = now;
+    updateDisplay();
+    showToast('Memoria recuperada · pulsa MRC otra vez para borrarla');
+  }
+
+  function turnOff() {
+    isPoweredOn = false;
+    calculatorEl.classList.add('is-off');
+    updateDisplay();
+  }
+
+  function turnOn() {
+    if (isPoweredOn) return;
+    isPoweredOn = true;
+    calculatorEl.classList.remove('is-off');
+    clearCalculator();
   }
 
   function performCalculation(first, second, operator) {
@@ -141,7 +211,6 @@
     waitingForOperand = true;
     justCalculated = false;
     lastExpression = `${formatDisplay(firstOperand)} ${operatorSymbols[nextOperator]}`;
-    memoryIndicator.textContent = 'OPERACIÓN';
     updateDisplay();
     updateActiveOperator();
   }
@@ -166,7 +235,6 @@
     pendingOperator = null;
     waitingForOperand = false;
     justCalculated = true;
-    memoryIndicator.textContent = 'RESULTADO';
     updateDisplay();
     updateActiveOperator();
   }
@@ -178,7 +246,6 @@
     waitingForOperand = false;
     justCalculated = true;
     lastExpression = message;
-    memoryIndicator.textContent = 'REVISAR';
     updateDisplay();
     updateActiveOperator();
   }
@@ -208,11 +275,20 @@
   }
 
   function updateDisplay() {
+    if (!isPoweredOn) {
+      resultEl.textContent = '';
+      expressionEl.textContent = '\u00a0';
+      minusIndicator.textContent = '\u00a0';
+      memoryIndicator.textContent = '\u00a0';
+      return;
+    }
     resultEl.textContent = displayValue === 'Error' ? 'Error' : formatDisplay(displayValue);
     expressionEl.textContent = lastExpression || '\u00a0';
+    minusIndicator.textContent = displayValue.startsWith('-') ? '− MINUS' : '\u00a0';
+    memoryIndicator.textContent = memoryValue !== 0 ? 'MEMORY' : '\u00a0';
     const length = resultEl.textContent.length;
-    resultEl.classList.toggle('small', length > 11 && length <= 15);
-    resultEl.classList.toggle('tiny', length > 15);
+    resultEl.classList.toggle('small', length > 10 && length <= 13);
+    resultEl.classList.toggle('tiny', length > 13);
   }
 
   function updateActiveOperator() {
@@ -304,13 +380,13 @@
   }
 
   function useHistoryResult(item) {
+    if (!isPoweredOn) turnOn();
     displayValue = item.result;
     firstOperand = null;
     pendingOperator = null;
     waitingForOperand = false;
     justCalculated = true;
     lastExpression = `${item.expression} =`;
-    memoryIndicator.textContent = 'RECUPERADO';
     updateDisplay();
     updateActiveOperator();
     closeHistory();
@@ -354,17 +430,29 @@
     setTimeout(() => button.classList.remove('is-pressed'), 100);
   }
 
-  keypad.addEventListener('click', (event) => {
+  calculatorEl.addEventListener('click', (event) => {
     const button = event.target.closest('button');
-    if (!button) return;
+    if (!button || button.classList.contains('history-button')) return;
+    const action = button.dataset.action;
+
+    if (!isPoweredOn) {
+      if (action === 'clear' || action === 'power') turnOn();
+      return;
+    }
 
     if (button.dataset.number !== undefined) inputDigit(button.dataset.number);
     if (button.dataset.operator) chooseOperator(button.dataset.operator);
-    if (button.dataset.action === 'decimal') inputDecimal();
-    if (button.dataset.action === 'clear') clearCalculator();
-    if (button.dataset.action === 'sign') toggleSign();
-    if (button.dataset.action === 'percent') inputPercent();
-    if (button.dataset.action === 'equals') calculateResult();
+    if (action === 'decimal') inputDecimal();
+    if (action === 'clear') clearCalculator();
+    if (action === 'clear-entry') clearEntry();
+    if (action === 'sign') toggleSign();
+    if (action === 'percent') inputPercent();
+    if (action === 'equals') calculateResult();
+    if (action === 'sqrt') calculateSquareRoot();
+    if (action === 'memory-add') updateMemory('add');
+    if (action === 'memory-subtract') updateMemory('subtract');
+    if (action === 'memory-recall') recallMemory();
+    if (action === 'power') turnOff();
   });
 
   document.querySelector('#openHistoryIntro').addEventListener('click', openHistory);
@@ -404,6 +492,12 @@
         }
       }
       return;
+    }
+
+    if (!isPoweredOn) {
+      const canWake = /^\d$/.test(event.key) || ['.', ',', '+', '-', '*', '/', 'Enter', '=', 'Escape', 'Delete'].includes(event.key);
+      if (!canWake) return;
+      turnOn();
     }
 
     if (/^\d$/.test(event.key)) {

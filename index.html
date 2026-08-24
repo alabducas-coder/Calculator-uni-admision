@@ -10,6 +10,7 @@
     <meta name="theme-color" content="#f3efe7" />
     <title>Numa — Calculadora</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="classic-calculator.css?v=2" />
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -22,7 +23,7 @@
           </span>
           <span>NUMA</span>
         </a>
-        <p class="edition">UTILIDAD DIGITAL · 01</p>
+        <p class="edition">EDICIÓN CLÁSICA · 04</p>
       </header>
 
       <section class="hero" aria-labelledby="page-title">
@@ -30,8 +31,8 @@
           <p class="eyebrow"><span></span> Precisión en cada operación</p>
           <h1 id="page-title">Calcula.<br /><em>Sin complicaciones.</em></h1>
           <p class="intro-copy">
-            Una calculadora simple y precisa, con todas tus operaciones guardadas
-            para cuando quieras volver a ellas.
+            Una calculadora electrónica clásica con memoria, raíz cuadrada y todas
+            tus operaciones guardadas para cuando quieras volver a ellas.
           </p>
 
           <button class="history-cta" id="openHistoryIntro" type="button">
@@ -55,17 +56,16 @@
           <div class="accent-shape accent-shape-one" aria-hidden="true"></div>
           <div class="accent-shape accent-shape-two" aria-hidden="true"></div>
 
-          <div class="calculator" aria-label="Calculadora">
-            <div class="calculator-topbar">
-              <div class="device-brand">
-                <span class="device-dot"></span>
-                NUMA / ONE
-              </div>
+          <div class="calculator" id="calculator" aria-label="Calculadora electrónica clásica">
+            <div class="device-heading">
+              <strong>NUMA</strong>
+              <span>ELECTRONIC CALCULATOR</span>
+              <small>NC–4H</small>
               <button
                 class="history-button"
                 id="openHistoryCalculator"
                 type="button"
-                aria-label="Abrir historial"
+                aria-label="Abrir historial de operaciones"
                 aria-haspopup="dialog"
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -76,44 +76,50 @@
               </button>
             </div>
 
-            <div class="display" role="region" aria-label="Pantalla de la calculadora">
-              <div class="display-meta">
-                <span id="memoryIndicator">LISTO</span>
-                <span class="status-dot" aria-hidden="true"></span>
+            <div class="display-bezel">
+              <div class="display" role="region" aria-label="Pantalla de la calculadora">
+                <div class="display-meta">
+                  <span id="minusIndicator">&nbsp;</span>
+                  <span id="memoryIndicator">&nbsp;</span>
+                </div>
+                <div class="expression" id="expression" aria-live="polite">&nbsp;</div>
+                <output class="result" id="result" aria-live="polite">0</output>
               </div>
-              <div class="expression" id="expression" aria-live="polite">&nbsp;</div>
-              <output class="result" id="result" aria-live="polite">0</output>
+            </div>
+
+            <div class="utility-keypad">
+              <button class="key key-utility" type="button" data-action="memory-recall" aria-label="Recuperar o borrar memoria">MRC</button>
+              <button class="key key-utility" type="button" data-action="memory-subtract" aria-label="Restar de memoria">M−</button>
+              <button class="key key-utility" type="button" data-action="memory-add" aria-label="Sumar a memoria">M+</button>
+              <button class="key key-utility key-root" type="button" data-action="sqrt" aria-label="Raíz cuadrada">√</button>
+              <button class="key key-utility key-off" type="button" data-action="power" aria-label="Apagar calculadora">OFF</button>
             </div>
 
             <div class="keypad" id="keypad">
-              <button class="key key-action" type="button" data-action="clear">AC</button>
-              <button class="key key-action" type="button" data-action="sign" aria-label="Cambiar signo">+/−</button>
-              <button class="key key-action" type="button" data-action="percent" aria-label="Porcentaje">%</button>
-              <button class="key key-operator" type="button" data-operator="/" aria-label="Dividir">÷</button>
+              <button class="key key-action key-clear" type="button" data-action="clear">AC</button>
+              <button class="key key-action key-clear" type="button" data-action="clear-entry">C</button>
+              <button class="key" type="button" data-action="sign" aria-label="Cambiar signo">+/−</button>
+              <button class="key" type="button" data-action="percent" aria-label="Porcentaje">%</button>
 
               <button class="key" type="button" data-number="7">7</button>
               <button class="key" type="button" data-number="8">8</button>
               <button class="key" type="button" data-number="9">9</button>
-              <button class="key key-operator" type="button" data-operator="*" aria-label="Multiplicar">×</button>
+              <button class="key key-operator" type="button" data-operator="/" aria-label="Dividir">÷</button>
 
               <button class="key" type="button" data-number="4">4</button>
               <button class="key" type="button" data-number="5">5</button>
               <button class="key" type="button" data-number="6">6</button>
-              <button class="key key-operator" type="button" data-operator="-" aria-label="Restar">−</button>
+              <button class="key key-operator" type="button" data-operator="*" aria-label="Multiplicar">×</button>
 
               <button class="key" type="button" data-number="1">1</button>
               <button class="key" type="button" data-number="2">2</button>
               <button class="key" type="button" data-number="3">3</button>
-              <button class="key key-operator" type="button" data-operator="+" aria-label="Sumar">+</button>
+              <button class="key key-operator" type="button" data-operator="-" aria-label="Restar">−</button>
 
-              <button class="key key-zero" type="button" data-number="0">0</button>
+              <button class="key" type="button" data-number="0">0</button>
               <button class="key" type="button" data-action="decimal" aria-label="Punto decimal">.</button>
               <button class="key key-equals" type="button" data-action="equals" aria-label="Resultado">=</button>
-            </div>
-
-            <div class="calculator-footer">
-              <span>RESPUESTA INSTANTÁNEA</span>
-              <span>V. 1.0</span>
+              <button class="key key-operator" type="button" data-operator="+" aria-label="Sumar">+</button>
             </div>
           </div>
         </div>

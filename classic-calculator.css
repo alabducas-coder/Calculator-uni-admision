@@ -1,0 +1,94 @@
+/* Apariencia de calculadora de bolsillo clásica basada en la referencia. */
+.calculator-stage { width: min(100%, 405px); }
+.accent-shape-one { width:168px; height:252px; top:-23px; right:-30px; border-radius:28px; background:#ba6a80; transform:rotate(4deg); opacity:.48; }
+.accent-shape-two { width:115px; height:115px; bottom:42px; left:-28px; border-color:rgba(84,76,91,.25); border-radius:24px; transform:rotate(12deg); }
+
+.calculator {
+  position:relative; padding:27px 35px 35px; overflow:hidden;
+  border:1px solid #37333c; border-radius:28px 28px 22px 22px / 20px 20px 28px 28px;
+  color:#f9f8f6;
+  background:linear-gradient(90deg,rgba(255,255,255,.055),transparent 7%,transparent 93%,rgba(0,0,0,.15)),linear-gradient(180deg,#504b58 0%,#45414d 46%,#4b4652 100%);
+  box-shadow:0 38px 68px rgba(32,27,35,.29),0 8px 16px rgba(30,26,32,.2),inset 4px 0 rgba(27,24,30,.14),inset -4px 0 rgba(27,24,30,.14),inset 0 2px 2px rgba(255,255,255,.13);
+}
+.calculator::before { content:''; position:absolute; inset:8px 12px 14px; border-right:2px solid rgba(27,24,30,.19); border-left:2px solid rgba(255,255,255,.055); border-radius:21px 21px 16px 16px; pointer-events:none; }
+.calculator::after { content:''; position:absolute; z-index:0; right:37px; bottom:13px; left:37px; height:4px; border-radius:50%; background:rgba(17,15,19,.23); box-shadow:0 -1px rgba(255,255,255,.04); }
+
+.device-heading { position:relative; z-index:1; height:104px; display:flex; flex-direction:column; align-items:center; color:rgba(249,248,246,.77); text-align:center; text-shadow:0 1px rgba(0,0,0,.25); }
+.device-heading strong,.device-heading span,.device-heading small { display:block; }
+.device-heading strong { color:#e5e3e5; font-size:29px; font-weight:700; line-height:1; letter-spacing:.03em; }
+.device-heading span { margin-top:11px; font-family:var(--mono); font-size:9px; letter-spacing:.2em; }
+.device-heading small { margin-top:6px; font-family:var(--mono); font-size:16px; font-weight:400; letter-spacing:.08em; }
+.device-heading .history-button { position:absolute; top:-7px; right:-17px; width:37px; height:37px; margin:0; border:1px solid rgba(255,255,255,.12); border-radius:50%; color:#dedade; background:rgba(31,28,34,.2); box-shadow:inset 0 1px rgba(255,255,255,.04); }
+.device-heading .history-button:hover { color:#fff; background:rgba(26,23,29,.45); }
+.device-heading .history-badge { top:-4px; right:-6px; border-color:#4b4652; background:#b9677e; }
+
+.display-bezel { position:relative; z-index:1; margin:0 -1px 24px; padding:15px 14px 18px; border:1px solid #302c34; border-radius:9px 9px 17px 17px; background:linear-gradient(145deg,#29262d 0%,#504b56 18%,#413d47 53%,#26232a 100%); box-shadow:0 3px 3px rgba(21,19,23,.3),inset 0 4px 7px rgba(9,8,10,.43),inset 0 -3px 3px rgba(255,255,255,.055); }
+.display-bezel::before { content:''; position:absolute; top:-1px; right:16px; left:16px; height:6px; border-radius:50%; background:rgba(16,14,18,.34); filter:blur(2px); }
+.display { height:130px; margin:0; padding:10px 13px 9px; border:1px solid #24292a; border-radius:5px; color:#080e0f; background:linear-gradient(115deg,rgba(255,255,255,.2),transparent 32%),repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(20,30,28,.025) 4px),#d6e1e1; box-shadow:inset 1px 2px 5px rgba(24,31,31,.25),0 1px rgba(255,255,255,.08); transition:filter .18s ease,background .18s ease; }
+.display-meta { height:19px; display:flex; align-items:center; justify-content:flex-start; gap:12px; color:#11191a; font-family:'Share Tech Mono',var(--mono); font-size:10px; font-weight:700; letter-spacing:.05em; }
+.expression { height:20px; padding-top:4px; color:rgba(14,23,23,.54); font-family:'Share Tech Mono',var(--mono); font-size:9px; }
+.result,.result.small,.result.tiny { height:70px; display:flex; align-items:center; justify-content:flex-end; color:#070d0e; font-family:'Share Tech Mono',var(--mono); font-size:50px; font-weight:400; line-height:1; letter-spacing:-.085em; text-shadow:1px 1px rgba(255,255,255,.25); }
+.result.small { font-size:41px; }
+.result.tiny { font-size:32px; }
+.calculator.is-off .display { background:#bdc8c7; filter:saturate(.5) brightness(.9); }
+
+.utility-keypad,.keypad { position:relative; z-index:1; }
+.utility-keypad { margin-bottom:22px; display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+.keypad { display:grid; grid-template-columns:repeat(4,1fr); gap:13px 15px; }
+.key { height:55px; border:1px solid #17151a; border-radius:8px 8px 11px 11px; color:#f7f6f7; background:linear-gradient(180deg,#37333c 0%,#252229 48%,#1c1a20 100%); box-shadow:0 4px 1px #19171c,0 5px 4px rgba(17,15,19,.45),inset 0 2px rgba(255,255,255,.13),inset 2px 0 rgba(255,255,255,.035),inset -2px 0 rgba(0,0,0,.24); font-family:var(--sans); font-size:25px; font-weight:400; text-shadow:0 1px 1px #000; }
+.key:hover { background:linear-gradient(180deg,#45404a 0%,#302c34 50%,#211e25 100%); }
+.key:active,.key.is-pressed { transform:translateY(4px); box-shadow:0 0 #19171c,0 1px 2px rgba(17,15,19,.35),inset 0 2px 4px rgba(0,0,0,.25); }
+.key-utility { height:43px; border-radius:7px 7px 9px 9px; font-family:'Share Tech Mono',var(--mono); font-size:13px; letter-spacing:-.05em; }
+.key-root { font-family:Georgia,serif; font-size:27px; }
+.key-off { font-size:11px; }
+.key-action,.key-clear { color:#fff; background:linear-gradient(180deg,#c77b8f 0%,#ae5d76 52%,#94475f 100%); box-shadow:0 4px 1px #602d3d,0 5px 4px rgba(17,15,19,.4),inset 0 2px rgba(255,255,255,.22),inset 2px 0 rgba(255,255,255,.06),inset -2px 0 rgba(0,0,0,.18); font-size:22px; }
+.key-action:hover,.key-clear:hover { background:linear-gradient(180deg,#d68ba0 0%,#b7657e 52%,#9c4e66 100%); }
+.key-operator { color:#f7f6f7; background:linear-gradient(180deg,#393640 0%,#252229 48%,#1c1a20 100%); font-size:28px; }
+.key-operator.is-active { color:#fff; background:linear-gradient(180deg,#c77b8f 0%,#a6536d 58%,#7d3b50 100%); }
+.key-equals { color:#f7f6f7; background:linear-gradient(180deg,#393640 0%,#252229 48%,#1c1a20 100%); box-shadow:0 4px 1px #19171c,0 5px 4px rgba(17,15,19,.45),inset 0 2px rgba(255,255,255,.13); font-size:27px; }
+.key-equals:hover { background:linear-gradient(180deg,#45404a 0%,#302c34 50%,#211e25 100%); }
+.key-equals:active,.key-equals.is-pressed { box-shadow:0 0 #19171c,inset 0 2px 4px rgba(0,0,0,.25); }
+
+@media (max-width:580px) {
+  .calculator-stage { width:min(100% - 2px,390px); }
+  .calculator { padding:23px clamp(22px,8.2vw,32px) 31px; border-radius:24px 24px 19px 19px / 18px 18px 25px 25px; }
+  .device-heading { height:91px; }
+  .device-heading strong { font-size:25px; }
+  .device-heading span { margin-top:9px; font-size:8px; }
+  .device-heading small { font-size:14px; }
+  .device-heading .history-button { right:-10px; }
+  .display-bezel { margin-bottom:20px; padding:12px 11px 15px; }
+  .display { height:112px; padding:8px 11px 7px; }
+  .display-meta { height:16px; font-size:9px; }
+  .expression { height:18px; }
+  .result,.result.small,.result.tiny { height:60px; font-size:clamp(34px,13vw,47px); }
+  .result.small { font-size:clamp(29px,10.5vw,39px); }
+  .result.tiny { font-size:clamp(24px,8.8vw,32px); }
+  .utility-keypad { gap:7px; margin-bottom:18px; }
+  .keypad { gap:10px 11px; }
+  .key { height:clamp(48px,14.2vw,54px); font-size:clamp(20px,7vw,25px); }
+  .key-utility { height:39px; font-size:clamp(9px,3.4vw,13px); }
+  .key-root { font-size:24px; }
+  .key-off { font-size:9px; }
+  .key-action { font-size:21px; }
+}
+
+@media (max-height:780px) and (min-width:981px) {
+  .calculator-stage { width:min(100%,355px); }
+  .calculator { padding:18px 30px 27px; }
+  .device-heading { height:77px; }
+  .device-heading strong { font-size:23px; }
+  .device-heading span { margin-top:7px; font-size:7px; }
+  .device-heading small { margin-top:3px; font-size:12px; }
+  .display-bezel { margin-bottom:17px; padding:10px 11px 12px; }
+  .display { height:98px; }
+  .display-meta { height:14px; }
+  .expression { height:15px; padding-top:2px; }
+  .result,.result.small,.result.tiny { height:54px; font-size:39px; }
+  .result.small { font-size:33px; }
+  .result.tiny { font-size:27px; }
+  .utility-keypad { margin-bottom:15px; gap:8px; }
+  .keypad { gap:9px 12px; }
+  .key { height:43px; }
+  .key-utility { height:34px; font-size:10px; }
+}
