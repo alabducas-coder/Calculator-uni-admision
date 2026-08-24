@@ -1,0 +1,62 @@
+=====================================================================
+ CALCULADORA CASIO HL-4A  ·  Emulador de escritorio (8 dígitos)
+=====================================================================
+
+Este paquete contiene un emulador NO OFICIAL de la calculadora de
+bolsillo CASIO HL-4A (8 dígitos, mini), con su misma distribución de
+teclas y comportamiento básico. Uso educativo / personal.
+
+CONTENIDO
+---------------------------------------------------------------------
+  Calculadora HL-4A (Windows 64 bits).exe   -> programa para Windows x64
+  Calculadora HL-4A (Windows 32 bits).exe   -> programa para Windows x86
+  Calculadora HL-4A (Web, sin instalacion).html -> versión de navegador
+  Linux-macOS/hl4a_tk.py                    -> versión Linux / macOS
+  LEEME.txt                                 -> este archivo
+
+CÓMO USAR EN WINDOWS (¡sin instalar nada!)
+---------------------------------------------------------------------
+ 1. Descomprime este ZIP en cualquier carpeta.
+ 2. Haz doble clic en "Calculadora HL-4A (Windows 64 bits).exe"
+    (usa la de 32 bits solo si tu Windows es muy antiguo).
+ 3. ¡Listo! No requiere instalación ni permisos de administrador.
+
+ Si Windows mostrara el aviso "SmartScreen protegió tu equipo",
+ pulsa "Más información" → "Ejecutar igualmente" (es un programa
+ nuevo sin firma digital, no un problema real).
+
+CÓMO USAR LA VERSIÓN WEB
+---------------------------------------------------------------------
+ Haz doble clic en el archivo .html: se abre en tu navegador y
+ funciona 100 % sin internet.
+
+CÓMO USAR EN LINUX / macOS
+---------------------------------------------------------------------
+ Con Python 3 instalado:  python3 hl4a_tk.py
+ (o abre el archivo .html en cualquier navegador).
+
+TECLADO (en todas las versiones)
+---------------------------------------------------------------------
+ 0-9 y .      dígitos y punto decimal
+ + - * /      sumar, restar, multiplicar, dividir
+ Enter / =    resultado          Esc        AC (todo claro / ON)
+ Supr / Retroceso  C (borra entrada)         %  porcentaje
+ R            raíz cuadrada
+
+TECLAS DEL APARATO
+---------------------------------------------------------------------
+ AC   enciende y borra todo        C     borra la entrada actual
+ OFF  apaga                        +/-   cambia el signo
+ %    porcentaje                   √     raíz cuadrada
+ M+   suma a memoria               M-    resta de memoria
+ MRC  1ª pulsación: recuerda memoria (MR)
+      2ª pulsación: borra la memoria (MC)
+
+ El indicador MINUS se enciende con números negativos y MEMORY
+ cuando hay algo guardado en memoria. Máximo 8 dígitos; si una
+ operación se pasa, aparece "E" (pulsa AC para continuar).
+
+NOTA
+---------------------------------------------------------------------
+ Emulador independiente sin relación con CASIO Computer Co., Ltd.
+ "CASIO" y "HL-4A" se citan solo para identificar el modelo emulado.

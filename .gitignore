@@ -1,0 +1,7 @@
+*.pdb
+*.o
+node_modules/
+__pycache__/
+src/app.res
+image-search/
+calc_assets/
