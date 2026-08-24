@@ -10,6 +10,8 @@
   const calculatorEl = document.querySelector('#calculator');
   const memoryIndicator = document.querySelector('#memoryIndicator');
   const minusIndicator = document.querySelector('#minusIndicator');
+  const fractionIndicator = document.querySelector('#fractionIndicator');
+  const fractionButton = document.querySelector('[data-action="fraction"]');
   const historyDrawer = document.querySelector('#historyDrawer');
   const drawerBackdrop = document.querySelector('#drawerBackdrop');
   const historyList = document.querySelector('#historyList');
@@ -19,6 +21,7 @@
   const toast = document.querySelector('#toast');
 
   let displayValue = '0';
+  let displayMode = 'decimal';
   let firstOperand = null;
   let pendingOperator = null;
   let waitingForOperand = false;
@@ -53,6 +56,7 @@
   }
 
   function inputDigit(digit) {
+    displayMode = 'decimal';
     if (displayValue === 'Error' || waitingForOperand || justCalculated) {
       displayValue = digit;
       waitingForOperand = false;
@@ -67,6 +71,7 @@
   }
 
   function inputDecimal() {
+    displayMode = 'decimal';
     if (displayValue === 'Error' || waitingForOperand || justCalculated) {
       displayValue = '0.';
       waitingForOperand = false;
@@ -80,6 +85,7 @@
 
   function clearCalculator() {
     displayValue = '0';
+    displayMode = 'decimal';
     firstOperand = null;
     pendingOperator = null;
     waitingForOperand = false;
@@ -103,12 +109,14 @@
       ? (firstOperand * value) / 100
       : value / 100;
     displayValue = normalizeResult(percentage);
+    displayMode = 'decimal';
     justCalculated = false;
     updateDisplay();
   }
 
   function clearEntry() {
     displayValue = '0';
+    displayMode = 'decimal';
     waitingForOperand = false;
     justCalculated = false;
     lastExpression = pendingOperator && firstOperand !== null
@@ -126,6 +134,7 @@
     }
     const rootExpression = `√(${formatDisplay(value)})`;
     displayValue = normalizeResult(Math.sqrt(value));
+    displayMode = 'decimal';
     lastExpression = `${rootExpression} =`;
     addHistory(rootExpression, displayValue);
     waitingForOperand = false;
@@ -154,6 +163,7 @@
       return;
     }
     displayValue = normalizeResult(memoryValue);
+    displayMode = 'decimal';
     waitingForOperand = false;
     justCalculated = false;
     lastMemoryRecallAt = now;
@@ -184,6 +194,7 @@
 
   function chooseOperator(nextOperator) {
     if (displayValue === 'Error') clearCalculator();
+    displayMode = 'decimal';
 
     const inputValue = Number(displayValue);
 
@@ -229,6 +240,7 @@
     }
 
     displayValue = normalizeResult(calculatedValue);
+    displayMode = 'decimal';
     lastExpression = `${fullExpression} =`;
     addHistory(fullExpression, displayValue);
     firstOperand = null;
@@ -241,6 +253,7 @@
 
   function showError(message = 'La operación no es válida') {
     displayValue = 'Error';
+    displayMode = 'decimal';
     firstOperand = null;
     pendingOperator = null;
     waitingForOperand = false;
@@ -257,6 +270,48 @@
     const rounded = Number.parseFloat(number.toPrecision(12));
     const text = String(rounded);
     return text.length > 16 ? rounded.toExponential(8) : text;
+  }
+
+  function decimalToFraction(value) {
+    const target = Math.abs(Number(value));
+    if (!Number.isFinite(target)) return String(value);
+    if (Number.isInteger(target)) return String(Number(value));
+
+    const sign = Number(value) < 0 ? -1 : 1;
+    const maxDenominator = 100000;
+    const tolerance = 1e-10;
+    let continuedValue = target;
+    let numeratorPrevious = 0;
+    let numerator = 1;
+    let denominatorPrevious = 1;
+    let denominator = 0;
+
+    for (let iteration = 0; iteration < 32; iteration += 1) {
+      const integerPart = Math.floor(continuedValue);
+      const nextNumerator = integerPart * numerator + numeratorPrevious;
+      const nextDenominator = integerPart * denominator + denominatorPrevious;
+      if (nextDenominator > maxDenominator) break;
+
+      numeratorPrevious = numerator;
+      numerator = nextNumerator;
+      denominatorPrevious = denominator;
+      denominator = nextDenominator;
+
+      if (Math.abs(numerator / denominator - target) <= tolerance) break;
+      const remainder = continuedValue - integerPart;
+      if (remainder < Number.EPSILON) break;
+      continuedValue = 1 / remainder;
+    }
+
+    if (denominator === 0) return String(value);
+    return `${sign * numerator}/${denominator}`;
+  }
+
+  function toggleFractionMode() {
+    if (displayValue === 'Error') return;
+    displayMode = displayMode === 'decimal' ? 'fraction' : 'decimal';
+    updateDisplay();
+    showToast(displayMode === 'fraction' ? 'Mostrando como fracción' : 'Mostrando como decimal');
   }
 
   function formatDisplay(value) {
@@ -280,12 +335,22 @@
       expressionEl.textContent = '\u00a0';
       minusIndicator.textContent = '\u00a0';
       memoryIndicator.textContent = '\u00a0';
+      fractionIndicator.textContent = '\u00a0';
+      fractionButton.classList.remove('is-active');
+      fractionButton.setAttribute('aria-pressed', 'false');
       return;
     }
-    resultEl.textContent = displayValue === 'Error' ? 'Error' : formatDisplay(displayValue);
+    resultEl.textContent = displayValue === 'Error'
+      ? 'Error'
+      : displayMode === 'fraction'
+        ? decimalToFraction(displayValue)
+        : formatDisplay(displayValue);
+    fractionButton.classList.toggle('is-active', displayMode === 'fraction');
+    fractionButton.setAttribute('aria-pressed', String(displayMode === 'fraction'));
     expressionEl.textContent = lastExpression || '\u00a0';
     minusIndicator.textContent = displayValue.startsWith('-') ? '− MINUS' : '\u00a0';
     memoryIndicator.textContent = memoryValue !== 0 ? 'MEMORY' : '\u00a0';
+    fractionIndicator.textContent = displayMode === 'fraction' ? 'FRAC' : '\u00a0';
     const length = resultEl.textContent.length;
     resultEl.classList.toggle('small', length > 10 && length <= 13);
     resultEl.classList.toggle('tiny', length > 13);
@@ -311,6 +376,13 @@
     history = history.slice(0, 50);
     saveHistory();
     renderHistory();
+  }
+
+  function deleteHistoryItem(id) {
+    history = history.filter((item) => item.id !== id);
+    saveHistory();
+    renderHistory();
+    showToast('Resultado eliminado');
   }
 
   function getDayLabel(dateString) {
@@ -362,14 +434,21 @@
         : '';
       previousDay = day;
       return `${dayHeader}
-        <button class="history-item" type="button" data-history-id="${escapeHTML(item.id)}" aria-label="Usar resultado ${escapeHTML(item.result)}">
-          <span class="history-number">
-            <span class="history-expression">${escapeHTML(item.expression)}</span>
-            <strong class="history-result">${escapeHTML(formatDisplay(item.result))}</strong>
-          </span>
-          <span class="history-time">${escapeHTML(formatTime(item.createdAt))}</span>
-          <span class="use-result" aria-hidden="true">↗</span>
-        </button>`;
+        <div class="history-row">
+          <button class="history-item" type="button" data-history-id="${escapeHTML(item.id)}" aria-label="Usar resultado ${escapeHTML(item.result)}">
+            <span class="history-number">
+              <span class="history-expression">${escapeHTML(item.expression)}</span>
+              <strong class="history-result">${escapeHTML(formatDisplay(item.result))}</strong>
+            </span>
+            <span class="history-time">${escapeHTML(formatTime(item.createdAt))}</span>
+            <span class="use-result" aria-hidden="true">↗</span>
+          </button>
+          <button class="history-delete" type="button" data-delete-history-id="${escapeHTML(item.id)}" aria-label="Eliminar resultado ${escapeHTML(item.result)}" title="Eliminar resultado">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
+            </svg>
+          </button>
+        </div>`;
     }).join('');
   }
 
@@ -382,6 +461,7 @@
   function useHistoryResult(item) {
     if (!isPoweredOn) turnOn();
     displayValue = item.result;
+    displayMode = 'decimal';
     firstOperand = null;
     pendingOperator = null;
     waitingForOperand = false;
@@ -449,6 +529,7 @@
     if (action === 'percent') inputPercent();
     if (action === 'equals') calculateResult();
     if (action === 'sqrt') calculateSquareRoot();
+    if (action === 'fraction') toggleFractionMode();
     if (action === 'memory-add') updateMemory('add');
     if (action === 'memory-subtract') updateMemory('subtract');
     if (action === 'memory-recall') recallMemory();
@@ -468,9 +549,15 @@
   });
 
   historyList.addEventListener('click', (event) => {
-    const button = event.target.closest('[data-history-id]');
-    if (!button) return;
-    const item = history.find((entry) => entry.id === button.dataset.historyId);
+    const deleteButton = event.target.closest('[data-delete-history-id]');
+    if (deleteButton) {
+      deleteHistoryItem(deleteButton.dataset.deleteHistoryId);
+      return;
+    }
+
+    const resultButton = event.target.closest('[data-history-id]');
+    if (!resultButton) return;
+    const item = history.find((entry) => entry.id === resultButton.dataset.historyId);
     if (item) useHistoryResult(item);
   });
 
@@ -527,6 +614,10 @@
       event.preventDefault();
       clearCalculator();
       pressButton('[data-action="clear"]');
+    } else if (event.key.toLowerCase() === 'f') {
+      event.preventDefault();
+      toggleFractionMode();
+      pressButton('[data-action="fraction"]');
     } else if (event.key === '%') {
       event.preventDefault();
       inputPercent();
@@ -534,6 +625,7 @@
     } else if (event.key === 'Backspace') {
       event.preventDefault();
       if (!waitingForOperand && displayValue !== 'Error') {
+        displayMode = 'decimal';
         displayValue = displayValue.length > 1 ? displayValue.slice(0, -1) : '0';
         if (displayValue === '-') displayValue = '0';
         updateDisplay();

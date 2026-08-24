@@ -33,7 +33,7 @@
 .calculator.is-off .display { background:#bdc8c7; filter:saturate(.5) brightness(.9); }
 
 .utility-keypad,.keypad { position:relative; z-index:1; }
-.utility-keypad { margin-bottom:22px; display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+.utility-keypad { margin-bottom:22px; display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }
 .keypad { display:grid; grid-template-columns:repeat(4,1fr); gap:13px 15px; }
 .key { height:55px; border:1px solid #17151a; border-radius:8px 8px 11px 11px; color:#f7f6f7; background:linear-gradient(180deg,#37333c 0%,#252229 48%,#1c1a20 100%); box-shadow:0 4px 1px #19171c,0 5px 4px rgba(17,15,19,.45),inset 0 2px rgba(255,255,255,.13),inset 2px 0 rgba(255,255,255,.035),inset -2px 0 rgba(0,0,0,.24); font-family:var(--sans); font-size:25px; font-weight:400; text-shadow:0 1px 1px #000; }
 .key:hover { background:linear-gradient(180deg,#45404a 0%,#302c34 50%,#211e25 100%); }
@@ -41,6 +41,8 @@
 .key-utility { height:43px; border-radius:7px 7px 9px 9px; font-family:'Share Tech Mono',var(--mono); font-size:13px; letter-spacing:-.05em; }
 .key-root { font-family:Georgia,serif; font-size:27px; }
 .key-off { font-size:11px; }
+.key-fraction { font-size:11px; letter-spacing:-.08em; }
+.key-fraction.is-active { color:#fff; background:linear-gradient(180deg,#c77b8f 0%,#a6536d 58%,#7d3b50 100%); box-shadow:0 4px 1px #602d3d,0 5px 4px rgba(17,15,19,.4),inset 0 2px rgba(255,255,255,.18); }
 .key-action,.key-clear { color:#fff; background:linear-gradient(180deg,#c77b8f 0%,#ae5d76 52%,#94475f 100%); box-shadow:0 4px 1px #602d3d,0 5px 4px rgba(17,15,19,.4),inset 0 2px rgba(255,255,255,.22),inset 2px 0 rgba(255,255,255,.06),inset -2px 0 rgba(0,0,0,.18); font-size:22px; }
 .key-action:hover,.key-clear:hover { background:linear-gradient(180deg,#d68ba0 0%,#b7657e 52%,#9c4e66 100%); }
 .key-operator { color:#f7f6f7; background:linear-gradient(180deg,#393640 0%,#252229 48%,#1c1a20 100%); font-size:28px; }

@@ -9,8 +9,8 @@
     />
     <meta name="theme-color" content="#f3efe7" />
     <title>Numa — Calculadora</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="classic-calculator.css?v=2" />
+    <link rel="stylesheet" href="styles.css?v=3" />
+    <link rel="stylesheet" href="classic-calculator.css?v=3" />
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -31,7 +31,7 @@
           <p class="eyebrow"><span></span> Precisión en cada operación</p>
           <h1 id="page-title">Calcula.<br /><em>Sin complicaciones.</em></h1>
           <p class="intro-copy">
-            Una calculadora electrónica clásica con memoria, raíz cuadrada y todas
+            Una calculadora electrónica clásica con memoria, fracciones y todas
             tus operaciones guardadas para cuando quieras volver a ellas.
           </p>
 
@@ -81,6 +81,7 @@
                 <div class="display-meta">
                   <span id="minusIndicator">&nbsp;</span>
                   <span id="memoryIndicator">&nbsp;</span>
+                  <span id="fractionIndicator">&nbsp;</span>
                 </div>
                 <div class="expression" id="expression" aria-live="polite">&nbsp;</div>
                 <output class="result" id="result" aria-live="polite">0</output>
@@ -92,6 +93,7 @@
               <button class="key key-utility" type="button" data-action="memory-subtract" aria-label="Restar de memoria">M−</button>
               <button class="key key-utility" type="button" data-action="memory-add" aria-label="Sumar a memoria">M+</button>
               <button class="key key-utility key-root" type="button" data-action="sqrt" aria-label="Raíz cuadrada">√</button>
+              <button class="key key-utility key-fraction" type="button" data-action="fraction" aria-label="Alternar entre decimal y fracción">F↔D</button>
               <button class="key key-utility key-off" type="button" data-action="power" aria-label="Apagar calculadora">OFF</button>
             </div>
 
@@ -166,6 +168,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=3"></script>
   </body>
 </html>

@@ -682,25 +682,35 @@ kbd {
   text-transform: uppercase;
 }
 
+.history-row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--line);
+  transition: background 160ms ease;
+}
+
+.history-row:hover {
+  background: rgba(255, 255, 255, 0.46);
+}
+
 .history-item {
-  width: 100%;
+  width: auto;
+  min-width: 0;
+  flex: 1;
   padding: 18px 3px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   border: 0;
-  border-bottom: 1px solid var(--line);
   color: var(--ink);
   background: transparent;
   text-align: left;
   cursor: pointer;
-  transition: padding 160ms ease, background 160ms ease;
+  transition: padding 160ms ease;
 }
 
 .history-item:hover {
-  padding-right: 9px;
   padding-left: 9px;
-  background: rgba(255, 255, 255, 0.46);
 }
 
 .history-number {
@@ -754,6 +764,41 @@ kbd {
 .history-item:focus-visible .use-result {
   opacity: 1;
   transform: translateX(0);
+}
+
+.history-delete {
+  width: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  border: 0;
+  color: #9b958c;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(4px);
+  transition: color 150ms ease, background 150ms ease, opacity 150ms ease, transform 150ms ease;
+}
+
+.history-delete svg {
+  width: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.history-row:hover .history-delete,
+.history-delete:focus-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.history-delete:hover {
+  color: #a22e11;
+  background: rgba(162, 46, 17, 0.08);
 }
 
 .drawer-footer {
@@ -868,6 +913,7 @@ kbd {
   .drawer-content { padding: 12px 24px 24px; }
   .drawer-footer { padding: 18px 24px 24px; }
   .use-result { opacity: 1; transform: none; }
+  .history-delete { opacity: 1; transform: none; }
 }
 
 @media (max-height: 750px) and (min-width: 981px) {
@@ -878,6 +924,10 @@ kbd {
   .key { height: 49px; }
   .calculator-footer { margin-top: 15px; }
   .site-footer { min-height: 50px; }
+}
+
+@media (hover: none) {
+  .history-delete { opacity: 1; transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
