@@ -11,6 +11,7 @@ const packageData = require(path.join(root, 'package.json'));
 const releaseDirectory = path.join(root, 'release');
 const workDirectory = path.join(releaseDirectory, '.portable-build');
 const appDirectory = path.join(workDirectory, 'app');
+const edgeAppDirectory = path.join(workDirectory, 'edge-app');
 const archivePath = path.join(workDirectory, 'app.7z');
 const outputName = `Numa-Calculadora-Windows-${packageData.version}.exe`;
 const outputPath = path.join(releaseDirectory, outputName);
@@ -95,12 +96,50 @@ function copyApplicationFiles(destination) {
   );
 }
 
-function runSevenZip(argumentsList, formatName) {
+function prepareEdgeApplication(destination) {
+  const webAppDirectory = path.join(destination, 'app');
+  copyApplicationFiles(webAppDirectory);
+
+  const launcher = [
+    '@echo off',
+    'setlocal',
+    'set "APP_FILE=%~dp0app\\index.html"',
+    'set "APP_URL=%APP_FILE:\\=/%"',
+    'set "EDGE=%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe"',
+    'if not exist "%EDGE%" set "EDGE=%ProgramFiles%\\Microsoft\\Edge\\Application\\msedge.exe"',
+    'if not exist "%EDGE%" set "EDGE=%LOCALAPPDATA%\\Microsoft\\Edge\\Application\\msedge.exe"',
+    'if exist "%EDGE%" (',
+    '  start "" "%EDGE%" --app="file:///%APP_URL%?desktop=1" --user-data-dir="%LOCALAPPDATA%\\NumaCalculadora" --window-size=1280,900',
+    '  exit /b 0',
+    ')',
+    'start "" "%APP_FILE%"',
+    'exit /b 0',
+    ''
+  ].join('\r\n');
+
+  const instructions = [
+    'NUMA CALCULADORA PARA WINDOWS',
+    '================================',
+    '',
+    '1. No muevas los archivos por separado.',
+    '2. Haz doble clic en ABRIR NUMA CALCULADORA.cmd.',
+    '3. La calculadora se abrira como una aplicacion independiente usando Microsoft Edge.',
+    '4. El historial se guarda automaticamente en tu equipo.',
+    '',
+    'Si Edge no esta disponible, el programa abrira la calculadora en tu navegador predeterminado.',
+    ''
+  ].join('\r\n');
+
+  fs.writeFileSync(path.join(destination, 'ABRIR NUMA CALCULADORA.cmd'), launcher, 'utf8');
+  fs.writeFileSync(path.join(destination, 'LEEME.txt'), instructions, 'utf8');
+}
+
+function runSevenZip(argumentsList, formatName, workingDirectory = appDirectory) {
   fs.chmodSync(sevenZip, 0o755);
   const result = spawnSync(
     sevenZip,
     argumentsList,
-    { cwd: appDirectory, encoding: 'utf8', stdio: 'pipe' }
+    { cwd: workingDirectory, encoding: 'utf8', stdio: 'pipe' }
   );
   if (result.status !== 0) {
     throw new Error(`${formatName} terminó con código ${result.status}: ${result.stderr || result.stdout}`);
@@ -122,8 +161,9 @@ function build() {
 
   log('Comprimiendo el programa portable...');
   runSevenZip(['a', '-t7z', archivePath, '.', '-mx=9', '-m0=lzma2', '-mmt=on'], '7-Zip');
+  prepareEdgeApplication(edgeAppDirectory);
   fs.rmSync(zipPath, { force: true });
-  runSevenZip(['a', '-tzip', zipPath, '.', '-mx=9', '-mmt=on'], 'ZIP');
+  runSevenZip(['a', '-tzip', zipPath, '.', '-mx=9', '-mmt=on'], 'ZIP', edgeAppDirectory);
 
   const customizedSfx = path.join(workDirectory, 'numa-sfx.exe');
   patchWindowsResources(sfxSource, customizedSfx);

@@ -611,7 +611,7 @@
     }
   });
 
-  if (/Electron/i.test(navigator.userAgent)) {
+  if (/Electron/i.test(navigator.userAgent) || /(?:^|[?&])desktop=1(?:&|$)/.test(location.search)) {
     downloadWindowsButton.hidden = true;
   }
 
