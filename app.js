@@ -10,10 +10,12 @@
   const calculatorEl = document.querySelector('#calculator');
   const memoryIndicator = document.querySelector('#memoryIndicator');
   const minusIndicator = document.querySelector('#minusIndicator');
-  const fractionIndicator = document.querySelector('#fractionIndicator');
-  const fractionButton = document.querySelector('[data-action="fraction"]');
-  const historyDrawer = document.querySelector('#historyDrawer');
-  const drawerBackdrop = document.querySelector('#drawerBackdrop');
+  const historyPanel = document.querySelector('#historyPanel');
+  const historyToggleLabel = document.querySelector('#historyToggleLabel');
+  const historyToggleButtons = [
+    document.querySelector('#openHistoryIntro'),
+    document.querySelector('#openHistoryCalculator'),
+  ];
   const historyList = document.querySelector('#historyList');
   const clearHistoryButton = document.querySelector('#clearHistory');
   const historyBadge = document.querySelector('#historyBadge');
@@ -21,7 +23,6 @@
   const toast = document.querySelector('#toast');
 
   let displayValue = '0';
-  let displayMode = 'decimal';
   let firstOperand = null;
   let pendingOperator = null;
   let waitingForOperand = false;
@@ -31,7 +32,7 @@
   let memoryValue = 0;
   let isPoweredOn = true;
   let lastMemoryRecallAt = 0;
-  let lastFocusedElement = null;
+  const fractionalHistoryItems = new Set();
   let toastTimer;
 
   function loadHistory() {
@@ -56,7 +57,6 @@
   }
 
   function inputDigit(digit) {
-    displayMode = 'decimal';
     if (displayValue === 'Error' || waitingForOperand || justCalculated) {
       displayValue = digit;
       waitingForOperand = false;
@@ -71,7 +71,6 @@
   }
 
   function inputDecimal() {
-    displayMode = 'decimal';
     if (displayValue === 'Error' || waitingForOperand || justCalculated) {
       displayValue = '0.';
       waitingForOperand = false;
@@ -85,7 +84,6 @@
 
   function clearCalculator() {
     displayValue = '0';
-    displayMode = 'decimal';
     firstOperand = null;
     pendingOperator = null;
     waitingForOperand = false;
@@ -109,14 +107,12 @@
       ? (firstOperand * value) / 100
       : value / 100;
     displayValue = normalizeResult(percentage);
-    displayMode = 'decimal';
     justCalculated = false;
     updateDisplay();
   }
 
   function clearEntry() {
     displayValue = '0';
-    displayMode = 'decimal';
     waitingForOperand = false;
     justCalculated = false;
     lastExpression = pendingOperator && firstOperand !== null
@@ -134,7 +130,6 @@
     }
     const rootExpression = `√(${formatDisplay(value)})`;
     displayValue = normalizeResult(Math.sqrt(value));
-    displayMode = 'decimal';
     lastExpression = `${rootExpression} =`;
     addHistory(rootExpression, displayValue);
     waitingForOperand = false;
@@ -163,7 +158,6 @@
       return;
     }
     displayValue = normalizeResult(memoryValue);
-    displayMode = 'decimal';
     waitingForOperand = false;
     justCalculated = false;
     lastMemoryRecallAt = now;
@@ -194,7 +188,6 @@
 
   function chooseOperator(nextOperator) {
     if (displayValue === 'Error') clearCalculator();
-    displayMode = 'decimal';
 
     const inputValue = Number(displayValue);
 
@@ -240,7 +233,6 @@
     }
 
     displayValue = normalizeResult(calculatedValue);
-    displayMode = 'decimal';
     lastExpression = `${fullExpression} =`;
     addHistory(fullExpression, displayValue);
     firstOperand = null;
@@ -253,7 +245,6 @@
 
   function showError(message = 'La operación no es válida') {
     displayValue = 'Error';
-    displayMode = 'decimal';
     firstOperand = null;
     pendingOperator = null;
     waitingForOperand = false;
@@ -307,13 +298,6 @@
     return `${sign * numerator}/${denominator}`;
   }
 
-  function toggleFractionMode() {
-    if (displayValue === 'Error') return;
-    displayMode = displayMode === 'decimal' ? 'fraction' : 'decimal';
-    updateDisplay();
-    showToast(displayMode === 'fraction' ? 'Mostrando como fracción' : 'Mostrando como decimal');
-  }
-
   function formatDisplay(value) {
     if (value === null || value === undefined || value === 'Error') return String(value ?? '');
     const numeric = Number(value);
@@ -335,22 +319,12 @@
       expressionEl.textContent = '\u00a0';
       minusIndicator.textContent = '\u00a0';
       memoryIndicator.textContent = '\u00a0';
-      fractionIndicator.textContent = '\u00a0';
-      fractionButton.classList.remove('is-active');
-      fractionButton.setAttribute('aria-pressed', 'false');
       return;
     }
-    resultEl.textContent = displayValue === 'Error'
-      ? 'Error'
-      : displayMode === 'fraction'
-        ? decimalToFraction(displayValue)
-        : formatDisplay(displayValue);
-    fractionButton.classList.toggle('is-active', displayMode === 'fraction');
-    fractionButton.setAttribute('aria-pressed', String(displayMode === 'fraction'));
+    resultEl.textContent = displayValue === 'Error' ? 'Error' : formatDisplay(displayValue);
     expressionEl.textContent = lastExpression || '\u00a0';
     minusIndicator.textContent = displayValue.startsWith('-') ? '− MINUS' : '\u00a0';
     memoryIndicator.textContent = memoryValue !== 0 ? 'MEMORY' : '\u00a0';
-    fractionIndicator.textContent = displayMode === 'fraction' ? 'FRAC' : '\u00a0';
     const length = resultEl.textContent.length;
     resultEl.classList.toggle('small', length > 10 && length <= 13);
     resultEl.classList.toggle('tiny', length > 13);
@@ -380,9 +354,21 @@
 
   function deleteHistoryItem(id) {
     history = history.filter((item) => item.id !== id);
+    fractionalHistoryItems.delete(id);
     saveHistory();
     renderHistory();
     showToast('Resultado eliminado');
+  }
+
+  function toggleHistoryFraction(id) {
+    if (fractionalHistoryItems.has(id)) {
+      fractionalHistoryItems.delete(id);
+      showToast('Resultado mostrado como decimal');
+    } else {
+      fractionalHistoryItems.add(id);
+      showToast('Resultado mostrado como fracción');
+    }
+    renderHistory();
   }
 
   function getDayLabel(dateString) {
@@ -433,16 +419,19 @@
         ? `<p class="history-group-label">${escapeHTML(day)}</p>`
         : '';
       previousDay = day;
+      const isFraction = fractionalHistoryItems.has(item.id);
+      const visibleResult = isFraction ? decimalToFraction(item.result) : formatDisplay(item.result);
       return `${dayHeader}
         <div class="history-row">
           <button class="history-item" type="button" data-history-id="${escapeHTML(item.id)}" aria-label="Usar resultado ${escapeHTML(item.result)}">
             <span class="history-number">
               <span class="history-expression">${escapeHTML(item.expression)}</span>
-              <strong class="history-result">${escapeHTML(formatDisplay(item.result))}</strong>
+              <strong class="history-result${isFraction ? ' is-fraction' : ''}">${escapeHTML(visibleResult)}</strong>
             </span>
             <span class="history-time">${escapeHTML(formatTime(item.createdAt))}</span>
             <span class="use-result" aria-hidden="true">↗</span>
           </button>
+          <button class="history-fraction${isFraction ? ' is-active' : ''}" type="button" data-toggle-fraction-id="${escapeHTML(item.id)}" aria-pressed="${isFraction}" aria-label="${isFraction ? 'Ver este resultado como decimal' : 'Ver este resultado como fracción'}" title="${isFraction ? 'Ver como decimal' : 'Ver como fracción'}">F↔D</button>
           <button class="history-delete" type="button" data-delete-history-id="${escapeHTML(item.id)}" aria-label="Eliminar resultado ${escapeHTML(item.result)}" title="Eliminar resultado">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
@@ -461,7 +450,6 @@
   function useHistoryResult(item) {
     if (!isPoweredOn) turnOn();
     displayValue = item.result;
-    displayMode = 'decimal';
     firstOperand = null;
     pendingOperator = null;
     waitingForOperand = false;
@@ -469,31 +457,34 @@
     lastExpression = `${item.expression} =`;
     updateDisplay();
     updateActiveOperator();
-    closeHistory();
-    showToast('Resultado recuperado');
+    showToast('Resultado recuperado en la calculadora');
+  }
+
+  function updateHistoryToggleState(isVisible) {
+    historyToggleButtons.forEach((button) => {
+      button.setAttribute('aria-expanded', String(isVisible));
+      button.classList.toggle('is-active', isVisible);
+    });
+    historyToggleLabel.textContent = isVisible ? 'Ocultar historial' : 'Ver historial';
   }
 
   function openHistory() {
-    lastFocusedElement = document.activeElement;
-    drawerBackdrop.hidden = false;
+    if (!historyPanel.hidden) {
+      closeHistory();
+      return;
+    }
+    historyPanel.hidden = false;
+    updateHistoryToggleState(true);
     requestAnimationFrame(() => {
-      drawerBackdrop.classList.add('is-visible');
-      historyDrawer.classList.add('is-open');
+      historyPanel.classList.add('is-visible');
+      historyPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
-    historyDrawer.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => document.querySelector('#closeHistory').focus(), 80);
   }
 
   function closeHistory() {
-    historyDrawer.classList.remove('is-open');
-    drawerBackdrop.classList.remove('is-visible');
-    historyDrawer.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-    setTimeout(() => {
-      drawerBackdrop.hidden = true;
-      if (lastFocusedElement) lastFocusedElement.focus();
-    }, 320);
+    historyPanel.classList.remove('is-visible');
+    historyPanel.hidden = true;
+    updateHistoryToggleState(false);
   }
 
   function showToast(message) {
@@ -529,26 +520,30 @@
     if (action === 'percent') inputPercent();
     if (action === 'equals') calculateResult();
     if (action === 'sqrt') calculateSquareRoot();
-    if (action === 'fraction') toggleFractionMode();
     if (action === 'memory-add') updateMemory('add');
     if (action === 'memory-subtract') updateMemory('subtract');
     if (action === 'memory-recall') recallMemory();
     if (action === 'power') turnOff();
   });
 
-  document.querySelector('#openHistoryIntro').addEventListener('click', openHistory);
-  document.querySelector('#openHistoryCalculator').addEventListener('click', openHistory);
+  historyToggleButtons.forEach((button) => button.addEventListener('click', openHistory));
   document.querySelector('#closeHistory').addEventListener('click', closeHistory);
-  drawerBackdrop.addEventListener('click', closeHistory);
 
   clearHistoryButton.addEventListener('click', () => {
     history = [];
+    fractionalHistoryItems.clear();
     saveHistory();
     renderHistory();
     showToast('Historial eliminado');
   });
 
   historyList.addEventListener('click', (event) => {
+    const fractionToggle = event.target.closest('[data-toggle-fraction-id]');
+    if (fractionToggle) {
+      toggleHistoryFraction(fractionToggle.dataset.toggleFractionId);
+      return;
+    }
+
     const deleteButton = event.target.closest('[data-delete-history-id]');
     if (deleteButton) {
       deleteHistoryItem(deleteButton.dataset.deleteHistoryId);
@@ -562,22 +557,9 @@
   });
 
   document.addEventListener('keydown', (event) => {
-    if (historyDrawer.classList.contains('is-open')) {
-      if (event.key === 'Escape') closeHistory();
-
-      if (event.key === 'Tab') {
-        const focusable = [...historyDrawer.querySelectorAll('button:not(:disabled)')];
-        if (!focusable.length) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault();
-          last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault();
-          first.focus();
-        }
-      }
+    if (event.key === 'Escape' && !historyPanel.hidden) {
+      event.preventDefault();
+      closeHistory();
       return;
     }
 
@@ -614,10 +596,6 @@
       event.preventDefault();
       clearCalculator();
       pressButton('[data-action="clear"]');
-    } else if (event.key.toLowerCase() === 'f') {
-      event.preventDefault();
-      toggleFractionMode();
-      pressButton('[data-action="fraction"]');
     } else if (event.key === '%') {
       event.preventDefault();
       inputPercent();
@@ -625,8 +603,7 @@
     } else if (event.key === 'Backspace') {
       event.preventDefault();
       if (!waitingForOperand && displayValue !== 'Error') {
-        displayMode = 'decimal';
-        displayValue = displayValue.length > 1 ? displayValue.slice(0, -1) : '0';
+            displayValue = displayValue.length > 1 ? displayValue.slice(0, -1) : '0';
         if (displayValue === '-') displayValue = '0';
         updateDisplay();
       }
