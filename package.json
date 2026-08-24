@@ -1,0 +1,56 @@
+{
+  "name": "numa-calculadora",
+  "version": "1.0.0",
+  "description": "Calculadora electrónica clásica con historial, fracciones y memoria.",
+  "main": "electron-main.cjs",
+  "author": "Numa",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "desktop": "electron .",
+    "build:windows": "node scripts/build-windows-portable.cjs",
+    "build:windows:modern": "electron-builder --win portable --x64"
+  },
+  "devDependencies": {
+    "@firesoon/electron-prebuilt": "^1.0.0",
+    "7zip-bin": "^5.2.0",
+    "electron": "43.4.1",
+    "electron-builder": "26.15.3",
+    "pe-library": "^2.0.1",
+    "resedit": "^3.0.2"
+  },
+  "build": {
+    "appId": "com.numa.calculadora",
+    "productName": "Numa Calculadora",
+    "asar": true,
+    "compression": "maximum",
+    "directories": {
+      "output": "release",
+      "buildResources": "assets"
+    },
+    "files": [
+      "index.html",
+      "styles.css",
+      "classic-calculator.css",
+      "history-inline.css",
+      "legacy-desktop.css",
+      "app.js",
+      "electron-main.cjs",
+      "assets/icon.png",
+      "package.json"
+    ],
+    "win": {
+      "icon": "assets/icon.ico",
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Numa-Calculadora-Windows-${version}.${ext}"
+    }
+  }
+}

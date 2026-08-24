@@ -15,9 +15,18 @@ Calculadora web responsiva con una interfaz inspirada en una calculadora física
 - Soporte de teclado (`0–9`, operadores, `Enter`, `Backspace`, `Esc`).
 - Diseño adaptable a escritorio, tableta y móvil.
 
-## Ejecutar localmente
+## Aplicación para Windows
 
-No requiere dependencias ni proceso de compilación:
+El programa portable se genera como `release/Numa-Calculadora-Windows-1.0.0.exe`. No necesita instalación: basta con abrir el archivo en Windows de 64 bits.
+
+Para reconstruir el ejecutable:
+
+```bash
+npm install
+npm run build:windows
+```
+
+## Ejecutar como página web
 
 ```bash
 python3 -m http.server 4173 --bind 0.0.0.0

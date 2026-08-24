@@ -20,6 +20,7 @@
   const clearHistoryButton = document.querySelector('#clearHistory');
   const historyBadge = document.querySelector('#historyBadge');
   const historyCountIntro = document.querySelector('#historyCountIntro');
+  const downloadWindowsButton = document.querySelector('#downloadWindows');
   const toast = document.querySelector('#toast');
 
   let displayValue = '0';
@@ -39,7 +40,7 @@
     try {
       const saved = JSON.parse(localStorage.getItem(HISTORY_KEY));
       return Array.isArray(saved) ? saved.slice(0, 50) : [];
-    } catch {
+    } catch (error) {
       return [];
     }
   }
@@ -47,7 +48,7 @@
   function saveHistory() {
     try {
       localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-    } catch {
+    } catch (error) {
       // The calculator still works when storage is disabled.
     }
   }
@@ -609,6 +610,10 @@
       }
     }
   });
+
+  if (/Electron/i.test(navigator.userAgent)) {
+    downloadWindowsButton.hidden = true;
+  }
 
   renderHistory();
   updateDisplay();
